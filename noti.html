@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notification Center - FixMyArea</title>
+  <!-- Instant Theme Loader to prevent FOUC -->
+  <script>
+    (function () {
+      var theme = localStorage.getItem('fixmyarea_theme');
+      if (theme === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+    })();
+  </script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .noti-page-container {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    .noti-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--border-light);
+      padding-bottom: 1rem;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 4rem 1rem;
+      color: var(--text-muted);
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      border: 2px dashed var(--border);
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Slide Menu & Overlay -->
+  <div class="slide-menu-overlay" id="slideOverlay"
+    onclick="document.getElementById('slideMenu').classList.remove('active'); this.classList.remove('active');"></div>
+  <aside class="slide-menu" id="slideMenu">
+    <button class="close-btn"
+      onclick="document.getElementById('slideMenu').classList.remove('active'); document.getElementById('slideOverlay').classList.remove('active');"><i
+        class="fa-solid fa-xmark"></i></button>
+    <div style="padding: 0 2rem 2rem; border-bottom: 1px solid var(--border-light); margin-bottom: 1rem;">
+      <div class="logo" style="font-size: 1.25rem; color:var(--primary); font-weight:800;"><i
+          class="fa-solid fa-map-location-dot"></i> FixMyArea</div>
+      <p style="color:var(--text-muted); font-size:0.875rem; margin-top:0.5rem;">Kozhikode Civic Portal</p>
+    </div>
+    <a href="index.html" class="menu-item"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+    <a href="profile.html" class="menu-item"><i class="fa-solid fa-user-pen"></i> My Profile</a>
+    <a href="settings.html" class="menu-item"><i class="fa-solid fa-gear"></i> App Settings</a>
+    <a href="noti.html" class="menu-item"
+      style="border-left-color: var(--primary); background: var(--primary-light); color: var(--primary);"><i
+        class="fa-solid fa-bell"></i> Notifications</a>
+    <a href="about.html" class="menu-item"><i class="fa-solid fa-circle-info"></i> About Us</a>
+    <a href="connect.html" class="menu-item"><i class="fa-solid fa-handshake-angle"></i> Join Volunteer</a>
+    <a href="#" class="menu-item"
+      onclick="if(typeof logout === 'function') logout(); else { localStorage.removeItem('fixmyarea_user'); window.location.href='index.html'; }"><i
+        class="fa-solid fa-right-from-bracket" style="color:var(--status-reopened);"></i> <span
+        style="color:var(--status-reopened);">Sign Out</span></a>
+  </aside>
+
+  <nav class="navbar">
+    <div style="display:flex; align-items:center; gap:1.5rem;">
+      <button id="btnHamburger" class="hamburger-icon"
+        onclick="document.getElementById('slideMenu').classList.add('active'); document.getElementById('slideOverlay').classList.add('active');"><i
+          class="fa-solid fa-bars"></i></button>
+      <a href="index.html" class="logo" style="text-decoration:none;"><i class="fa-solid fa-map-location-dot"></i>
+        FixMyArea</a>
+    </div>
+    <div class="nav-links" style="display:flex; gap:2rem;">
+      <a href="index.html" style="text-decoration:none; color:var(--text-main); font-weight:600;">Dashboard</a>
+      <a href="profile.html" style="text-decoration:none; color:var(--text-main); font-weight:600;">Profile</a>
+      <a href="noti.html" style="text-decoration:none; color:var(--primary); font-weight:700;">Notifications</a>
+    </div>
+    <div class="nav-actions">
+      <!-- Simplified Profile Dropdown -->
+      <button onclick="window.location.href='profile.html'" class="btn btn-outline" style="border:none; padding:0.5rem;"
+        title="Go to Profile">
+        <i class="fa-solid fa-user-circle fa-2x" style="color:var(--text-muted);"></i>
+      </button>
+    </div>
+  </nav>
+
+  <main class="noti-page-container">
+
+    <div class="noti-controls">
+      <div>
+        <h1 style="font-size: 2rem; color: var(--text-main);"><i class="fa-solid fa-bell"
+            style="color:var(--primary);"></i> Notification Center</h1>
+        <p style="color: var(--text-muted); margin-top: 0.25rem;">Stay updated on your civic reports and area alerts.
+        </p>
+      </div>
+      <button class="btn btn-outline"
+        onclick="this.innerHTML='<i class=\'fa-solid fa-check-double\'></i> Cleared!'; setTimeout(() => this.innerHTML='Mark All as Read', 2000)"><i
+          class="fa-solid fa-check"></i> Mark All as Read</button>
+    </div>
+
+    <div class="news-feed-wrapper" style="display:flex; flex-direction: column; gap: 1.5rem;">
+
+      <!-- Notification 1 -->
+      <div class="notification-card" style="border-left: 5px solid var(--primary);">
+        <div class="notification-content">
+          <div class="notification-title">Issue Successfully Submitted</div>
+          <div class="notification-text">Your report on <strong style="color:var(--text-main)">"Garbage
+              overflow"</strong> has been recorded in our system. Reference ID: FIX-8492.</div>
+          <span class="notification-time"><i class="fa-regular fa-clock"></i> 2 hours ago</span>
+        </div>
+        <span class="notification-badge badge-new" style="white-space:nowrap;">Just In</span>
+      </div>
+
+      <!-- Notification 2 -->
+      <div class="notification-card" style="border-left: 5px solid var(--status-progress);">
+        <div class="notification-content">
+          <div class="notification-title">Status Updated to Progress</div>
+          <div class="notification-text">Your issue <strong style="color:var(--text-main)">"Pothole near central
+              library"</strong> has been acknowledged by the PWD and work has begun. Verification team deployed.</div>
+          <span class="notification-time"><i class="fa-regular fa-clock"></i> 4 hours ago</span>
+        </div>
+        <span class="notification-badge badge-progress" style="white-space:nowrap;">In Progress</span>
+      </div>
+
+      <!-- Notification 3 -->
+      <div class="notification-card" style="border-left: 5px solid var(--status-resolved);">
+        <div class="notification-content">
+          <div class="notification-title">Issue Officially Resolved!</div>
+          <div class="notification-text">The <strong style="color:var(--text-main)">"Water pipeline leakage"</strong>
+            plumbing defect at Ward 12 has been fully resolved. Thanks for helping Kozhikode!</div>
+          <span class="notification-time"><i class="fa-regular fa-clock"></i> 1 day ago</span>
+        </div>
+        <span class="notification-badge badge-resolved" style="white-space:nowrap;">Resolved</span>
+      </div>
+
+      <!-- Admin Alert -->
+      <div class="notification-card" style="border-left: 5px solid var(--status-reopened);">
+        <div class="notification-content">
+          <div class="notification-title">System Alert: Scheduled Maintenance</div>
+          <div class="notification-text">Water supply logic maintenance in Ward 15 this Sunday. Services might be
+            offline for 3 hours. Please use water sparingly.</div>
+          <span class="notification-time"><i class="fa-regular fa-clock"></i> 2 days ago</span>
+        </div>
+        <span class="notification-badge badge-alert" style="white-space:nowrap;">Alert</span>
+      </div>
+
+    </div>
+
+  </main>
+
+</body>
+
+</html>

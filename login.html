@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FixMyArea - Sign In</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <!-- Instant Theme Loader to prevent FOUC -->
+    <script>
+        (function() {
+            var theme = localStorage.getItem('fixmyarea_theme');
+            if (theme === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+        })();
+    </script>
+    <style>
+        body {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.9) 0%, rgba(16, 185, 129, 0.9) 100%), url('https://images.unsplash.com/photo-1596484552945-8cedfe435520?auto=format&fit=crop&q=80&w=2000') center/cover;
+            min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; margin: 0;
+        }
+        .login-card {
+            background: var(--surface); padding: 3rem; border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-xl); max-width: 450px; width: 100%; text-align: center;
+            animation: fadeIn 0.5s ease-out;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .login-logo { font-size: 2rem; font-weight: 800; color: var(--primary); margin-bottom: 0.5rem; text-decoration: none; display:block;}
+        .login-subtitle { color: var(--text-muted); margin-bottom: 2.5rem; font-size: 1.125rem; }
+        
+        .portal-tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 2rem; }
+        .portal-tab {
+            flex: 1; padding: 1rem; font-weight: 600; cursor: pointer; color: var(--text-muted);
+            border-bottom: 3px solid transparent; transition: all 0.2s; font-size: 0.95rem;
+        }
+        .portal-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+    </style>
+</head>
+<body>
+
+    <!-- Slide Menu & Overlay -->
+    <div class="slide-menu-overlay" id="slideOverlay" onclick="document.getElementById('slideMenu').classList.remove('active'); this.classList.remove('active');"></div>
+    <aside class="slide-menu" id="slideMenu">
+        <button class="close-btn" onclick="document.getElementById('slideMenu').classList.remove('active'); document.getElementById('slideOverlay').classList.remove('active');"><i class="fa-solid fa-xmark"></i></button>
+        <div style="padding: 0 2rem 2rem; border-bottom: 1px solid var(--border-light); margin-bottom: 1rem;">
+            <div class="logo" style="font-size: 1.25rem; color:var(--primary); font-weight:800;"><i class="fa-solid fa-map-location-dot"></i> FixMyArea</div>
+            <p style="color:var(--text-muted); font-size:0.875rem; margin-top:0.5rem;">Kozhikode Civic Portal</p>
+        </div>
+        <a href="index.html" class="menu-item"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+        <a href="profile.html" class="menu-item"><i class="fa-solid fa-user-pen"></i> My Profile</a>
+        <a href="settings.html" class="menu-item"><i class="fa-solid fa-gear"></i> App Settings</a>
+        <a href="about.html" class="menu-item"><i class="fa-solid fa-circle-info"></i> About Us</a>
+        <a href="connect.html" class="menu-item"><i class="fa-solid fa-handshake-angle"></i> Join Volunteer</a>
+    </aside>
+
+    <div style="position:absolute; top: 1.5rem; left: 1.5rem; z-index:100;">
+        <button id="btnHamburger" class="hamburger-icon" onclick="document.getElementById('slideMenu').classList.add('active'); document.getElementById('slideOverlay').classList.add('active');"><i class="fa-solid fa-bars" style="font-size:1.75rem;"></i></button>
+    </div>
+
+    <div class="login-card">
+        <a href="index.html" class="login-logo"><i class="fa-solid fa-map-location-dot"></i> FixMyArea</a>
+        <p class="login-subtitle">Welcome back to the platform.</p>
+
+        <div class="portal-tabs">
+            <div class="portal-tab active" onclick="switchPortal('citizen')" id="tab-citizen">Citizen Sign In</div>
+            <div class="portal-tab" onclick="switchPortal('admin')" id="tab-admin">Authority Sign In</div>
+        </div>
+
+        <!-- Citizen Form -->
+        <form id="form-citizen" style="text-align: left;">
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" id="citEmail" required placeholder="name@example.com">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="citPassword" required placeholder="••••••••">
+            </div>
+            <button type="button" class="btn btn-primary btn-block" onclick="loginUser('citizen')" style="margin-bottom:1.5rem; padding: 0.85rem;"><i class="fa-solid fa-right-to-bracket"></i> Secure Sign In</button>
+            <div style="text-align:center; padding-top:1.5rem; border-top:1px solid var(--border-light);">
+                <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:1rem;">New to FixMyArea?</p>
+                <a href="register.html" class="btn btn-outline btn-block"><i class="fa-solid fa-user-plus"></i> Create an Account</a>
+            </div>
+            <div id="citError" style="color:var(--status-pending); font-size:0.875rem; text-align:center; display:none; margin-top:1rem;"></div>
+        </form>
+
+        <!-- Admin Form -->
+        <form id="form-admin" style="text-align: left; display: none;">
+            <div class="form-group">
+                <label>Official Email</label>
+                <input type="email" id="admEmail" required placeholder="official@fixmyarea.com">
+            </div>
+            <div class="form-group">
+                <label>Admin Password</label>
+                <input type="password" id="admPassword" required placeholder="••••••••">
+            </div>
+            <button type="button" class="btn btn-primary btn-block" onclick="loginUser('admin')" style="padding: 0.85rem;"><i class="fa-solid fa-shield-halved"></i> Access Dashboard</button>
+            <div id="admError" style="color:var(--status-pending); font-size:0.875rem; text-align:center; display:none; margin-top:1rem;"></div>
+        </form>
+    </div>
+
+    <script>
+        // Specific standalone script for Login page so we don't load map libraries
+        function switchPortal(type) {
+            if (type === 'citizen') {
+                document.getElementById('tab-citizen').classList.add('active');
+                document.getElementById('tab-admin').classList.remove('active');
+                document.getElementById('form-citizen').style.display = 'block';
+                document.getElementById('form-admin').style.display = 'none';
+            } else {
+                document.getElementById('tab-admin').classList.add('active');
+                document.getElementById('tab-citizen').classList.remove('active');
+                document.getElementById('form-admin').style.display = 'block';
+                document.getElementById('form-citizen').style.display = 'none';
+            }
+        }
+
+        function loginUser(type) {
+            const errorDiv = document.getElementById(type === 'citizen' ? "citError" : "admError");
+            errorDiv.style.display = "none";
+            
+            const email = document.getElementById(type === 'citizen' ? "citEmail" : "admEmail").value.trim();
+            const password = document.getElementById(type === 'citizen' ? "citPassword" : "admPassword").value;
+            
+            if (!email || !password) {
+                errorDiv.innerText = "Please fill in all credentials.";
+                errorDiv.style.display = "block"; return;
+            }
+            
+            // Mock Login Execute
+            const uid = type + "_" + Date.now();
+            let role = (email.includes("admin")) ? "admin" : "citizen";
+            if (type === 'admin') role = 'admin'; // Override if in auth portal
+            
+            const savedUser = { uid, role, email, name: email.split('@')[0] };
+            localStorage.setItem("fixmyarea_user", JSON.stringify(savedUser));
+            
+            // Redirect to landing page to view mapped dashboard
+            window.location.href = "index.html";
+        }
+    </script>
+</body>
+</html>

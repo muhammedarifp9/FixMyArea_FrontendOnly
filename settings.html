@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - FixMyArea</title>
+    <!-- Instant Theme Loader to prevent FOUC -->
+    <script>
+        (function() {
+            var theme = localStorage.getItem('fixmyarea_theme');
+            if (theme === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+        })();
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <!-- Slide Menu & Overlay -->
+    <div class="slide-menu-overlay" id="slideOverlay" onclick="document.getElementById('slideMenu').classList.remove('active'); this.classList.remove('active');"></div>
+    <aside class="slide-menu" id="slideMenu">
+        <button class="close-btn" onclick="document.getElementById('slideMenu').classList.remove('active'); document.getElementById('slideOverlay').classList.remove('active');"><i class="fa-solid fa-xmark"></i></button>
+        <div style="padding: 0 2rem 2rem; border-bottom: 1px solid var(--border-light); margin-bottom: 1rem;">
+            <div class="logo" style="font-size: 1.25rem; color:var(--primary); font-weight:800;"><i class="fa-solid fa-map-location-dot"></i> FixMyArea</div>
+            <p style="color:var(--text-muted); font-size:0.875rem; margin-top:0.5rem;">Kozhikode Civic Portal</p>
+        </div>
+        <a href="index.html" class="menu-item"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+        <a href="profile.html" class="menu-item"><i class="fa-solid fa-user-pen"></i> My Profile</a>
+        <a href="settings.html" class="menu-item" style="border-left-color: var(--primary); background: var(--primary-light); color: var(--primary);"><i class="fa-solid fa-gear"></i> App Settings</a>
+        <a href="about.html" class="menu-item"><i class="fa-solid fa-circle-info"></i> About Us</a>
+        <a href="connect.html" class="menu-item"><i class="fa-solid fa-handshake-angle"></i> Join Volunteer</a>
+        <a href="#" class="menu-item" onclick="if(typeof logout === 'function') logout(); else { localStorage.removeItem('fixmyarea_user'); window.location.href='index.html'; }"><i class="fa-solid fa-right-from-bracket" style="color:var(--status-reopened);"></i> <span style="color:var(--status-reopened);">Sign Out</span></a>
+    </aside>
+
+    <nav class="navbar">
+        <div style="display:flex; align-items:center; gap:1.5rem;">
+            <button id="btnHamburger" class="hamburger-icon" onclick="document.getElementById('slideMenu').classList.add('active'); document.getElementById('slideOverlay').classList.add('active');"><i class="fa-solid fa-bars"></i></button>
+            <a href="index.html" class="logo" style="text-decoration:none;"><i class="fa-solid fa-map-location-dot"></i> FixMyArea</a>
+        </div>
+        <div class="nav-links" style="display:flex; gap:2rem;">
+            <a href="index.html" style="text-decoration:none; color:var(--text-main); font-weight:600;">Dashboard</a>
+            <a href="profile.html" style="text-decoration:none; color:var(--text-main); font-weight:600;">Profile</a>
+            <a href="settings.html" style="text-decoration:none; color:var(--primary); font-weight:700;">Settings</a>
+        </div>
+        <div class="nav-actions">
+            <!-- Simplified Profile dropdown for settings page -->
+            <button id="btnProfileSettings" onclick="window.location.href='profile.html'" class="btn btn-outline" style="border:none; padding:0.5rem;">
+                <i class="fa-solid fa-user-circle fa-2x" style="color:var(--text-muted);"></i>
+            </button>
+        </div>
+    </nav>
+
+    <main class="profile-container" style="max-width: 800px; margin: 3rem auto; padding: 0 1rem;">
+        <div style="margin-bottom: 2rem;">
+            <h1 style="font-size: 2.25rem; color: var(--text-main); margin-bottom: 0.5rem;">App Settings</h1>
+            <p style="color: var(--text-muted); font-size: 1.05rem;">Manage your preferences, appearance, and localization.</p>
+        </div>
+
+        <div class="profile-card" style="padding: 2.5rem; border-radius: var(--radius-lg); background: var(--surface); box-shadow: var(--shadow-sm); border: 1px solid var(--border-light);">
+            
+            <h3 style="font-size: 1.25rem; margin-bottom: 1.5rem; color: var(--text-main); border-bottom: 1px solid var(--border-light); padding-bottom: 0.75rem;">
+                <i class="fa-solid fa-palette" style="color:var(--primary); margin-right: 0.5rem;"></i> Appearance
+            </h3>
+            
+            <div class="form-group" style="margin-bottom: 2rem;">
+                <label style="font-size: 1.05rem; font-weight: 600; color: var(--text-main);">Application Theme</label>
+                <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem;">Choose between Light and Dark mode globally.</p>
+                <select id="themeSelect" onchange="applyThemePreference(this.value)" style="width:100%; padding:0.85rem; border:1px solid var(--border); border-radius:var(--radius-md); font-size:1rem; background:var(--background); color:var(--text-main);">
+                    <option value="light">☀️ Light Theme</option>
+                    <option value="dark">🌙 Dark Theme</option>
+                </select>
+            </div>
+
+            <h3 style="font-size: 1.25rem; margin-bottom: 1.5rem; color: var(--text-main); border-bottom: 1px solid var(--border-light); padding-bottom: 0.75rem;">
+                <i class="fa-solid fa-earth-asia" style="color:var(--primary); margin-right: 0.5rem;"></i> Localization
+            </h3>
+
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label style="font-size: 1.05rem; font-weight: 600; color: var(--text-main);">Language Preference</label>
+                <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem;">Select your preferred language interface.</p>
+                <select id="langSelect" style="width:100%; padding:0.85rem; border:1px solid var(--border); border-radius:var(--radius-md); font-size:1rem; background:var(--background); color:var(--text-main);">
+                    <option value="en">English (Default)</option>
+                    <option value="ml">Malayalam / മലയാളം</option>
+                    <option value="hi">Hindi / हिन्दी</option>
+                </select>
+            </div>
+            
+            <button class="btn btn-primary btn-block" onclick="saveSettings()" style="margin-top: 2rem; padding: 1rem; font-size: 1.05rem;">
+                <i class="fa-solid fa-floppy-disk"></i> Save Preferences
+            </button>
+            <div id="settingsToast" style="display:none; color:var(--status-resolved); text-align:center; margin-top:1rem; font-weight:600;"><i class="fa-solid fa-circle-check"></i> Preferences Saved Successfully!</div>
+        </div>
+    </main>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Init form state
+        document.addEventListener("DOMContentLoaded", () => {
+            const currentTheme = localStorage.getItem("fixmyarea_theme") || "light";
+            document.getElementById("themeSelect").value = currentTheme;
+            
+            const currentLang = localStorage.getItem("fixmyarea_lang") || "en";
+            document.getElementById("langSelect").value = currentLang;
+        });
+
+        // Instant toggle for real-time visual feedback
+        function applyThemePreference(themeValue) {
+            if (themeValue === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+            }
+        }
+
+        // Final Save implementation
+        function saveSettings() {
+            const theme = document.getElementById("themeSelect").value;
+            const lang = document.getElementById("langSelect").value;
+            
+            localStorage.setItem("fixmyarea_theme", theme);
+            localStorage.setItem("fixmyarea_lang", lang);
+            
+            applyThemePreference(theme);
+            
+            const toast = document.getElementById("settingsToast");
+            toast.style.display = "block";
+            setTimeout(() => { toast.style.display = "none"; }, 3000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FixMyArea - Kozhikode</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <!-- Instant Theme Loader to prevent FOUC -->
+    <script>
+        (function() {
+            var theme = localStorage.getItem('fixmyarea_theme');
+            if (theme === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+        })();
+    </script>
+    
+    <!-- Leaflet mapping library -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Slide Menu & Overlay -->
+    <div class="slide-menu-overlay" id="slideOverlay" onclick="document.getElementById('slideMenu').classList.remove('active'); this.classList.remove('active');"></div>
+    <aside class="slide-menu" id="slideMenu">
+        <button class="close-btn" onclick="document.getElementById('slideMenu').classList.remove('active'); document.getElementById('slideOverlay').classList.remove('active');"><i class="fa-solid fa-xmark"></i></button>
+        <div style="padding: 0 2rem 2rem; border-bottom: 1px solid var(--border-light); margin-bottom: 1rem;">
+            <div class="logo" style="font-size: 1.25rem; color:var(--primary); font-weight:800;"><i class="fa-solid fa-map-location-dot"></i> FixMyArea</div>
+            <p style="color:var(--text-muted); font-size:0.875rem; margin-top:0.5rem;">Kozhikode Civic Portal</p>
+        </div>
+        <a href="index.html" class="menu-item" style="border-left-color: var(--primary); background: var(--primary-light); color: var(--primary);"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+        <a href="profile.html" class="menu-item"><i class="fa-solid fa-user-pen"></i> My Profile</a>
+        <a href="settings.html" class="menu-item"><i class="fa-solid fa-gear"></i> App Settings</a>
+        <a href="about.html" class="menu-item"><i class="fa-solid fa-circle-info"></i> About Us</a>
+        <a href="connect.html" class="menu-item"><i class="fa-solid fa-handshake-angle"></i> Join Volunteer</a>
+        <a href="#" class="menu-item" onclick="if(typeof logout === 'function') logout(); else { localStorage.removeItem('fixmyarea_user'); window.location.href='index.html'; }"><i class="fa-solid fa-right-from-bracket" style="color:var(--status-reopened);"></i> <span style="color:var(--status-reopened);">Sign Out</span></a>
+    </aside>
+
+    <!-- Main App Container (Visible by default) -->
+    <div id="appContainer" style="display: block;">
+        <nav class="navbar">
+            <div style="display:flex; align-items:center; gap:1.5rem;">
+                <button id="btnHamburger" class="hamburger-icon" onclick="document.getElementById('slideMenu').classList.add('active'); document.getElementById('slideOverlay').classList.add('active');"><i class="fa-solid fa-bars"></i></button>
+                <div class="logo">
+                    <i class="fa-solid fa-map-location-dot"></i> FixMyArea
+                </div>
+            </div>
+            <div class="nav-links" style="display:none; gap:2rem;" id="desktopNavLinks">
+                <a href="index.html" style="text-decoration:none; color:var(--primary); font-weight:700;">Dashboard</a>
+                <a href="about.html" style="text-decoration:none; color:var(--text-main); font-weight:600; cursor:pointer;">About Us</a>
+                <a href="settings.html" style="text-decoration:none; color:var(--text-main); font-weight:600; cursor:pointer;">Settings</a>
+                <a href="connect.html" style="text-decoration:none; color:var(--text-main); font-weight:600; cursor:pointer;">Join Us</a>
+            </div>
+            <div class="nav-actions">
+                <div id="userProfile" class="profile-dropdown-container">
+                    <button class="profile-avatar-btn" id="btnProfileToggle">
+                        <div class="avatar-circle" id="profileAvatarInitials" style="background:var(--border); color:var(--text-muted);"><i class="fa-solid fa-user"></i></div>
+                        <span id="profileName" class="profile-name" style="font-weight:600; color:var(--text-main);">Sign In</span>
+                        <i class="fa-solid fa-chevron-down" style="color:var(--text-muted); font-size:0.8rem; margin-left:0.25rem;"></i>
+                    </button>
+                    <div class="profile-menu">
+                        <div class="profile-header">
+                            <strong id="profileMenuRole">Welcome Guest</strong>
+                        </div>
+                        <div id="authMenuActions">
+                            <div class="dropdown-item" onclick="window.location.href='login.html'">
+                                <i class="fa-solid fa-door-open" style="color:var(--primary);"></i> <span style="font-weight:600; color:var(--text-main);">Sign In</span>
+                            </div>
+                            <div class="dropdown-item" onclick="window.location.href='register.html'">
+                                <i class="fa-solid fa-user-plus" style="color:var(--secondary);"></i> <span style="font-weight:600; color:var(--text-main);">Register Account</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button id="btnOpenReport" class="btn btn-primary" onclick="if(!currentUserUID){ window.location.href='login.html'; } else { showModal('reportModal'); }"><i class="fa-solid fa-plus"></i> Report Issue</button>
+            </div>
+        </nav>
+
+        <header class="hero-section">
+            <div class="hero-content">
+                <h1>Report. Track. Verify.</h1>
+                <p>Empowering the citizens of Kozhikode to fix local areas transparently.</p>
+                <div style="margin-top: 2rem; display: flex; justify-content: center; position: relative;">
+                    <div class="custom-dropdown-container" style="min-width: 280px; text-align: left;">
+                        <button class="custom-dropdown-btn btn-primary" type="button" style="padding: 1rem 1.75rem; font-size: 1.125rem; border-radius: 50px; border:none; color:white; justify-content: space-between; box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);">
+                            <span><i class="fa-solid fa-bolt" style="margin-right:0.75rem;"></i> I want to...</span>
+                            <i class="fa-solid fa-chevron-down" style="color:rgba(255,255,255,0.8); margin-left:1rem;"></i>
+                        </button>
+                        <div class="dropdown-menu" style="border-radius: var(--radius-lg); top: calc(100% + 1rem); box-shadow: var(--shadow-xl);">
+                            <div class="dropdown-item" onclick="document.getElementById('btnOpenReport').click()" style="padding: 1rem;"><i class="fa-solid fa-map-pin" style="color:var(--primary); font-size:1.1rem; width:24px;"></i> <strong>Report an Issue</strong></div>
+                            <div class="dropdown-item" onclick="document.getElementById('searchInput').focus()" style="padding: 1rem;"><i class="fa-solid fa-magnifying-glass" style="color:var(--secondary); font-size:1.1rem; width:24px;"></i> <strong>Track Existing Issues</strong></div>
+                            <div class="dropdown-item" onclick="window.location.href='connect.html'" style="padding: 1rem;"><i class="fa-solid fa-handshake-angle" style="color:var(--accent); font-size:1.1rem; width:24px;"></i> <strong>Become a Volunteer</strong></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stats-panel" style="margin-bottom: 3rem;">
+                <div class="stat-card">
+                    <h3 id="statTotal">0</h3>
+                    <p>Total Issues</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="statCommonCategory">-</h3>
+                    <p>Most Reported</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="statCritical">-</h3>
+                    <p>Most Critical</p>
+                </div>
+            </div>
+            
+            <div style="max-width: 1000px; margin: 4rem auto; text-align:left; padding: 2rem; background: var(--surface); border-radius: var(--radius-xl); box-shadow: var(--shadow-md); border: 1px solid var(--border-light);">
+                <h2 style="font-size:2rem; color:var(--primary); margin-bottom: 2rem; text-align:center;"><i class="fa-solid fa-map"></i> How FixMyArea Works</h2>
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap:2rem;">
+                    <div style="text-align:center;">
+                        <div style="width:60px; height:60px; border-radius:50%; background:var(--primary-light); color:var(--primary); display:flex; align-items:center; justify-content:center; font-size:1.5rem; margin:0 auto 1rem;">1</div>
+                        <h4 style="font-size:1.2rem; margin-bottom:0.5rem;">Report</h4>
+                        <p style="color:var(--text-muted); font-size:0.95rem;">Snap a verifiable photo of potholes, waste, or broken infrastructure in Kozhikode.</p>
+                    </div>
+                    <div style="text-align:center;">
+                        <div style="width:60px; height:60px; border-radius:50%; background:var(--primary-light); color:var(--primary); display:flex; align-items:center; justify-content:center; font-size:1.5rem; margin:0 auto 1rem;">2</div>
+                        <h4 style="font-size:1.2rem; margin-bottom:0.5rem;">Track & Verify</h4>
+                        <p style="color:var(--text-muted); font-size:0.95rem;">Citizens upvote critical issues and track municipal response directly on our public mapped dashboard.</p>
+                    </div>
+                    <div style="text-align:center;">
+                        <div style="width:60px; height:60px; border-radius:50%; background:var(--primary-light); color:var(--primary); display:flex; align-items:center; justify-content:center; font-size:1.5rem; margin:0 auto 1rem;">3</div>
+                        <h4 style="font-size:1.2rem; margin-bottom:0.5rem;">Resolve</h4>
+                        <p style="color:var(--text-muted); font-size:0.95rem;">Authorities provide photographic proof once fixed. You confirm before the issue is closed.</p>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="dashboard" style="position:relative; z-index:10;">
+            <!-- Live News & Notifications Feed -->
+        <section class="latest-news-section" style="max-width: var(--max-width); margin: 3rem auto; padding: 0 1rem;">
+            <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border-light); padding-bottom: 0.5rem;">
+                <h2 style="font-size: 1.75rem; color: var(--text-main); display:flex; align-items:center; gap:0.5rem;">
+                    <i class="fa-solid fa-bolt" style="color:var(--status-progress);"></i> Live Updates & News
+                </h2>
+                <a href="noti.html" style="color:var(--primary); text-decoration:none; font-weight:600; font-size:0.95rem;">View Full Feed <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+            
+            <div class="news-feed-wrapper" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;">
+                <!-- Notification 1 -->
+                <div class="notification-card" style="border-left: 5px solid var(--primary);">
+                    <div class="notification-content">
+                        <div class="notification-title">Scheduled Maintenance</div>
+                        <div class="notification-text">Water supply logic maintenance in Ward 15 this Sunday. Services might be offline for 3 hours.</div>
+                        <span class="notification-time"><i class="fa-regular fa-clock"></i> 2 hours ago</span>
+                    </div>
+                    <span class="notification-badge badge-alert">Alert</span>
+                </div>
+
+                <!-- Notification 2 -->
+                <div class="notification-card" style="border-left: 5px solid var(--status-progress);">
+                    <div class="notification-content">
+                        <div class="notification-title">Status Updated to Progress</div>
+                        <div class="notification-text">The "Pothole near central library" issue has been acknowledged by the PWD and work has begun.</div>
+                        <span class="notification-time"><i class="fa-regular fa-clock"></i> 4 hours ago</span>
+                    </div>
+                    <span class="notification-badge badge-progress">In Progress</span>
+                </div>
+
+                <!-- Notification 3 -->
+                <div class="notification-card" style="border-left: 5px solid var(--status-resolved);">
+                    <div class="notification-content">
+                        <div class="notification-title">Issue Officially Resolved</div>
+                        <div class="notification-text">Garbage clearance at the East End plot was completed. Thanks for reporting!</div>
+                        <span class="notification-time"><i class="fa-regular fa-clock"></i> 1 day ago</span>
+                    </div>
+                    <span class="notification-badge badge-resolved">Resolved</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Dashboard View -->
+            <!-- Interactive Map View -->
+            <div class="map-container">
+                <div id="map"></div>
+            </div>
+
+            <div class="filters">
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="search" id="searchInput" placeholder="Search issues, locations, descriptions...">
+                </div>
+                
+                <div class="filter-group custom-dropdown-container" id="dropdown-category">
+                    <button class="custom-dropdown-btn" type="button">
+                        <span class="dropdown-selected-text">All Categories</span>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </button>
+                    <div class="dropdown-menu">
+                        <div class="dropdown-item selected" data-value="All">All Categories</div>
+                        <div class="dropdown-item" data-value="Roads">🛣️ Roads & Potholes</div>
+                        <div class="dropdown-item" data-value="Waste">🗑️ Public Waste</div>
+                        <div class="dropdown-item" data-value="Drainage">💧 Drainage & Water</div>
+                        <div class="dropdown-item" data-value="Utilities">💡 Public Utilities</div>
+                        <div class="dropdown-item" data-value="Toilets">🚻 Public Toilets</div>
+                    </div>
+                    <input type="hidden" id="categoryFilter" value="All">
+                </div>
+                <div class="filter-group custom-dropdown-container" id="dropdown-status">
+                    <button class="custom-dropdown-btn" type="button">
+                        <span class="dropdown-selected-text">All Statuses</span>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </button>
+                    <div class="dropdown-menu">
+                        <div class="dropdown-item selected" data-value="All">All Statuses</div>
+                        <div class="dropdown-item" data-value="Pending">🟡 Pending</div>
+                        <div class="dropdown-item" data-value="In Progress">🔵 In Progress</div>
+                        <div class="dropdown-item" data-value="Review">🟣 Needs Verification</div>
+                        <div class="dropdown-item" data-value="Resolved">🟢 Resolved</div>
+                    </div>
+                    <input type="hidden" id="statusFilter" value="All">
+                </div>
+                <div class="filter-group custom-dropdown-container" id="dropdown-sort">
+                    <button class="custom-dropdown-btn" type="button">
+                        <span class="dropdown-selected-text">🔥 Highest Priority</span>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </button>
+                    <div class="dropdown-menu">
+                        <div class="dropdown-item selected" data-value="priority">🔥 Highest Priority</div>
+                        <div class="dropdown-item" data-value="recent">🕒 Most Recent</div>
+                    </div>
+                    <input type="hidden" id="sortFilter" value="priority">
+                </div>
+            </div>
+            
+            <!-- Loading Spinner -->
+            <div id="loadingSpinner" class="spinner-container" style="display: none;">
+                <div class="spinner"></div>
+                <p>Connecting to Firebase Datastore...</p>
+            </div>
+
+            <div id="issuesGrid" class="issues-grid">
+                <!-- Cards injected via JS -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Report Modal -->
+    <div id="reportModal" class="modal">
+        <div class="modal-content">
+        <div class="modal-content" style="max-width: 600px; padding: 2.5rem;">
+            <span class="close" onclick="hideModal('reportModal')" style="font-size:1.5rem; top:1.5rem; right:1.5rem;">&times;</span>
+            <div class="modal-header" style="margin-bottom: 2rem; border-bottom: 1px solid var(--border-light); padding-bottom: 1.5rem; text-align: left; justify-content: flex-start; gap: 1rem;">
+                <div style="width:50px; height:50px; border-radius:12px; background:var(--primary-light); color:var(--primary); display:flex; align-items:center; justify-content:center; font-size:1.5rem;">
+                    <i class="fa-solid fa-camera"></i>
+                </div>
+                <div>
+                    <h2 style="font-size: 1.5rem; margin-bottom: 0.25rem;">Report a Civic Issue</h2>
+                    <p style="color:var(--text-muted); font-size: 0.9rem;">Submit a verifiable photo. False reports may result in account suspension.</p>
+                </div>
+            </div>
+            <form id="reportForm" style="display:grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <div class="form-group" style="grid-column: span 2;">
+                    <label>Issue Category</label>
+                    <select id="issueCategory" required style="width:100%; padding:0.85rem; border:1.5px solid var(--border); border-radius:var(--radius-md); font-size:0.95rem; background:var(--surface);">
+                        <option value="Roads">🛣️ Roads & Potholes</option>
+                        <option value="Waste">🗑️ Public Waste Management</option>
+                        <option value="Drainage">💧 Drainage & Water Supply</option>
+                        <option value="Utilities">💡 Broken Utilities / Lights</option>
+                        <option value="Toilets">🚻 Public Toilets Maintenance</option>
+                    </select>
+                </div>
+                <div class="form-group" style="grid-column: span 2;">
+                    <label>Specific Location / Ward</label>
+                    <input type="text" id="issueLocation" placeholder="e.g. Ward 15, Near Central Library" required>
+                </div>
+                <div class="form-group" style="grid-column: span 2;">
+                    <label>Description of Issue</label>
+                    <textarea id="issueDescription" rows="4" placeholder="Describe the severity and exact location details..." required></textarea>
+                </div>
+                <div class="form-group" style="grid-column: span 2;">
+                    <label>Upload Photographic Proof</label>
+                    <div style="border: 2px dashed var(--primary-light); background: #F8FAFC; border-radius: var(--radius-md); padding: 2rem; text-align: center; cursor: pointer;" onclick="document.getElementById('issueFile').click()">
+                        <i class="fa-solid fa-cloud-arrow-up" style="font-size:2.5rem; color:var(--primary); margin-bottom:1rem;"></i>
+                        <p style="font-weight:600; color:var(--text-main); margin-bottom:0.25rem;">Click to browse images</p>
+                        <p style="font-size:0.8rem; color:var(--text-muted);">Supports JPG, PNG (Max 5MB)</p>
+                        <input type="file" id="issueFile" accept="image/*" required style="display:none;">
+                    </div>
+                </div>
+                <div style="grid-column: span 2; display:flex; gap:1rem; margin-top:1rem;">
+                    <button type="button" class="btn btn-outline" onclick="hideModal('reportModal')" style="flex:1; padding:1rem;">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="btnReportSubmit" style="flex:2; padding:1rem; font-size:1.05rem;"><i class="fa-solid fa-paper-plane"></i> Submit Official Report</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Resolution Proof Modal -->
+    <div id="adminModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeAdmin">&times;</span>
+            <h2>Submit Resolution Proof</h2>
+            <p>Upload a photo proving the issue has been fixed.</p>
+            <form id="adminForm">
+                <div class="form-group">
+                    <label>Upload 'After' Validation Image</label>
+                    <input type="file" id="adminFile" accept="image/png, image/jpeg, image/webp" required>
+                </div>
+                <button type="submit" id="btnAdminSubmit" class="btn btn-success btn-block"><i class="fa-solid fa-cloud-arrow-up"></i> Upload Fix Proof</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Issue Details & Verification Modal -->
+    <div id="detailsModal" class="modal">
+        <div class="modal-content details-content">
+            <span class="close" id="closeDetails">&times;</span>
+            <div id="detailsModalBody">
+                <!-- Content injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
