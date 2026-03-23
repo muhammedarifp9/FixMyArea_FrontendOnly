@@ -6,13 +6,13 @@ const SUPABASE_ANON_KEY = "sb_publishable_GjDs6el6czW7VSOlcp65Rg_RmErMInn";
 
 let supabase;
 try {
-    supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // The CDN exposes the library as window.supabase
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     console.log("Supabase initialized successfully.");
 } catch (err) {
     console.error("Supabase Initialization Error:", err);
 }
 
-// Global state shorthand for compatibility with existing functions
 const auth = supabase ? supabase.auth : null;
 const db = supabase; 
 
@@ -195,7 +195,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const currentLang = localStorage.getItem("fixmyarea_lang") || "en";
     applyTheme(currentTheme);
     applyLanguage(currentLang);
+    
+    // Initialize map + load issues for ALL users (public guests too)
     initMap();
+    if (supabase) listenToIssues();
 
     setupEventListeners();
 
@@ -213,6 +216,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     handleSuccessfulLogin({ uid: user.id, email: user.email }, "citizen", "User");
                 }
             } else {
+                // Guest: update nav but map is already loaded
                 handleLogoutUI();
             }
         });
