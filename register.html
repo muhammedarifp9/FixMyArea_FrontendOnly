@@ -17,7 +17,7 @@
     </script>
     <style>
         body {
-            background: linear-gradient(135deg, rgba(37, 99, 235, 0.9) 0%, rgba(16, 185, 129, 0.9) 100%), url('https://images.unsplash.com/photo-1596484552945-8cedfe435520?auto=format&fit=crop&q=80&w=2000') center/cover;
+            background: linear-gradient(rgba(37, 99, 235, 0.2), rgba(16, 185, 129, 0.2)), url('kozhikode_beach.png') center/cover no-repeat fixed;
             min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; margin: 0;
         }
         .login-card {
@@ -62,19 +62,19 @@
         <p class="login-subtitle">Join the movement to build a better city.</p>
 
         <div class="portal-tabs">
-            <div class="portal-tab active" onclick="switchPortal('citizen')" id="tab-citizen">Citizen Sign Up</div>
-            <div class="portal-tab" onclick="switchPortal('admin')" id="tab-admin">Authority Sign Up</div>
+            <div class="portal-tab active" onclick="switchPortal('citizen')" id="tab-citizen">Citizen</div>
+            <div class="portal-tab" onclick="switchPortal('admin')" id="tab-admin">Authority</div>
         </div>
 
-        <form id="form-citizen" style="text-align: left;">
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+        <form id="form-citizen" style="text-align: left;" class="reveal">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.25rem;">
                 <div class="form-group">
                     <label>Full Name</label>
                     <input type="text" id="regName" required placeholder="John Doe">
                 </div>
                 <div class="form-group">
-                    <label>Phone Number (Optional)</label>
-                    <input type="tel" id="regPhone" placeholder="+91 98765 43210">
+                    <label>Phone (Optional)</label>
+                    <input type="tel" id="regPhone" placeholder="+91 98765...">
                 </div>
             </div>
             <div class="form-group">
@@ -90,15 +90,17 @@
                 <input type="password" id="regPassword" required placeholder="At least 6 characters">
             </div>
             
-            <button type="button" class="btn btn-primary btn-block" onclick="registerUser('citizen')" style="margin-bottom:1.5rem; padding: 0.85rem;"><i class="fa-solid fa-check"></i> Register Citizen Account</button>
-            <div style="text-align:center;">
-                <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:0.5rem;">Already have an account?</p>
+            <button type="button" class="btn btn-primary btn-block" onclick="registerUser('citizen')" style="margin-top: 1rem; padding: 1rem;">
+                Create Account <i class="fa-solid fa-check"></i>
+            </button>
+            <div style="text-align:center; margin-top: 2rem;">
+                <p style="color:var(--text-muted); font-size:0.95rem; margin-bottom:0.5rem;">Already have an account?</p>
                 <a href="login.html" style="color:var(--primary); font-weight:700; text-decoration:none;">Sign In instead</a>
             </div>
-            <div id="citError" style="color:var(--status-pending); font-size:0.875rem; text-align:center; display:none; margin-top:1rem;"></div>
+            <div id="citError" style="color:var(--status-pending); font-size:0.875rem; text-align:center; display:none; margin-top:1rem; font-weight: 600;"></div>
         </form>
 
-        <form id="form-admin" style="text-align: left; display: none;">
+        <form id="form-admin" style="text-align: left; display: none;" class="reveal">
             <div class="form-group">
                 <label>Official Full Name</label>
                 <input type="text" id="admRegName" required placeholder="Officer Name">
@@ -116,16 +118,26 @@
                 <input type="password" id="admRegPassword" required placeholder="At least 6 characters">
             </div>
             
-            <button type="button" class="btn btn-primary btn-block" onclick="registerUser('admin')" style="margin-bottom:1.5rem; padding: 0.85rem;"><i class="fa-solid fa-building-shield"></i> Register Authority Account</button>
-            <div style="text-align:center;">
-                <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:0.5rem;">Already an authorized official?</p>
+            <button type="button" class="btn btn-primary btn-block" onclick="registerUser('admin')" style="margin-top: 1rem; padding: 1rem;">
+                Register Authority <i class="fa-solid fa-building-shield"></i>
+            </button>
+            <div style="text-align:center; margin-top: 2rem;">
+                <p style="color:var(--text-muted); font-size:0.95rem; margin-bottom:0.5rem;">Already an authorized official?</p>
                 <a href="login.html" style="color:var(--primary); font-weight:700; text-decoration:none;">Sign In to Authority Portal</a>
             </div>
-            <div id="admError" style="color:var(--status-pending); font-size:0.875rem; text-align:center; display:none; margin-top:1rem;"></div>
+            <div id="admError" style="color:var(--status-pending); font-size:0.875rem; text-align:center; display:none; margin-top:1rem; font-weight: 600;"></div>
         </form>
     </div>
 
     <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const params = new URLSearchParams(window.location.search);
+            const tab = params.get('portal');
+            if (tab === 'admin') {
+                switchPortal('admin');
+            }
+        });
+
         function switchPortal(type) {
             if (type === 'citizen') {
                 document.getElementById('tab-citizen').classList.add('active');
@@ -171,13 +183,24 @@
             
             // Mock user creation
             const uid = type + "_" + Date.now();
-            const role = type; // Enforce role based on form
+            const role = type; 
             
-            // Save to localStorage
-            const savedUser = { uid, role, email, name, phone: phone||"", ward: ward||"", dept: dept||"" };
-            localStorage.setItem("fixmyarea_user", JSON.stringify(savedUser));
+            const newUser = { uid, role, email, password, name, phone: phone||"", ward: ward||"", dept: dept||"" };
             
-            window.location.href = "index.html";
+            // Save to Mock User DB
+            const userDb = JSON.parse(localStorage.getItem("fixmyarea_mock_db") || "[]");
+            userDb.push(newUser);
+            localStorage.setItem("fixmyarea_mock_db", JSON.stringify(userDb));
+
+            // Set as active session
+            localStorage.setItem("fixmyarea_user", JSON.stringify(newUser));
+            
+            // Redirect based on role
+            if (newUser.role === 'admin') {
+                window.location.href = "index.html";
+            } else {
+                window.location.href = "report.html";
+            }
         }
     </script>
 </body>

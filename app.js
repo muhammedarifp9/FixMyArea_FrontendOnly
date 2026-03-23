@@ -14,14 +14,195 @@ let leafletMap = null;
 let currentMarkers = [];
 let mapInitialized = false;
 
-// Map helper icons
-const categoryIcons = {
-    "Roads": "fa-road",
-    "Waste": "fa-trash",
-    "Drainage": "fa-water",
-    "Utilities": "fa-lightbulb",
-    "Toilets": "fa-restroom"
+const translations = {
+    en: {
+        dashboard: "Dashboard",
+        profile: "My Profile",
+        settings: "App Settings",
+        about: "About Us",
+        connect: "Join Volunteer",
+        signOut: "Sign Out",
+        reportIssue: "Report Issue",
+        trackProgress: "Track Progress",
+        howItWorks: "How FixMyArea Works",
+        report: "Report",
+        track: "Track & Verify",
+        resolve: "Resolve",
+        totalIssues: "Total Issues",
+        mostReported: "Most Reported",
+        mostCritical: "Most Critical",
+        latestActivity: "Latest Activity",
+        latestNews: "Live Updates & News",
+        viewFullFeed: "View Full Feed",
+        allCategories: "All Categories",
+        allStatuses: "All Statuses",
+        highestPriority: "Highest Priority",
+        mostRecent: "Most Recent",
+        welcomeGuest: "Welcome Guest",
+        signIn: "Sign In",
+        register: "Register Account",
+        searchPlaceholder: "Search issues, locations, descriptions...",
+        appearance: "Appearance",
+        theme: "Application Theme",
+        light: "Light Theme",
+        dark: "Dark Theme",
+        localization: "Localization",
+        language: "Language Preference",
+        save: "Save Preferences",
+        saved: "Preferences Saved Successfully!",
+        legendPending: "Pending",
+        legendInProgress: "In Progress",
+        legendReview: "Needs Review",
+        legendResolved: "Resolved",
+        legendReopened: "Reopened",
+        locateMe: "Locate Me",
+        resetView: "Reset View",
+        heroBadge: "✨ Kozhikode Civic Initiative",
+        heroTitle: "Empowering Citizens.<br>Transforming Kozhikode.",
+        heroSub: "Report issues, track resolutions, and build a better community together through transparency and action.",
+        howItWorksSub: "Simple steps to a cleaner and better city.",
+        step1Desc: "Snap a photo and pin the location of any civic issue. It's fast, easy, and impactful.",
+        step2Desc: "Monitor progress in real-time. Upvote critical issues to ensure they get the attention they deserve.",
+        step3Desc: "Verify the fix once completed. We close the loop together with the local authorities.",
+        liveUpdatesSub: "Stay informed about local civic actions."
+    },
+    ml: {
+        dashboard: "ഡാഷ്ബോർഡ്",
+        profile: "എന്റെ പ്രൊഫൈൽ",
+        settings: "ആപ്പ് ക്രമീകരണങ്ങൾ",
+        about: "ഞങ്ങളെക്കുറിച്ച്",
+        connect: "വളന്റിയറാകൂ",
+        signOut: "പുറത്തുകടക്കുക",
+        reportIssue: "പ്രശ്നം റിപ്പോർട്ട് ചെയ്യുക",
+        trackProgress: "പുരോഗതി ട്രാക്ക് ചെയ്യുക",
+        howItWorks: "ഫിക്സ് മൈ ഏരിയ എങ്ങനെ പ്രവർത്തിക്കുന്നു",
+        report: "1. റിപ്പോർട്ട്",
+        track: "2. ട്രാക്ക്",
+        resolve: "3. പരിഹാരം",
+        totalIssues: "ആകെ പരാതികൾ",
+        mostReported: "കൂടുതൽ റിപ്പോർട്ട് ചെയ്തത്",
+        mostCritical: "ഏറ്റവും പ്രധാനം",
+        latestActivity: "അവസാനത്തെ പ്രവർത്തനം",
+        latestNews: "തത്സമയ അപ്‌ഡേറ്റുകൾ",
+        viewFullFeed: "ഫീഡ് കാണുക",
+        allCategories: "എല്ലാ വിഭാഗങ്ങളും",
+        allStatuses: "എല്ലാ അവസ്ഥകളും",
+        highestPriority: "ഏറ്റവും പ്രധാനം",
+        mostRecent: "ഏറ്റവും പുതിയത്",
+        welcomeGuest: "സ്വാഗതം ഗസ്റ്റ്",
+        signIn: "ലോഗിൻ ചെയ്യുക",
+        register: "അക്കൗണ്ട് തുടങ്ങുക",
+        searchPlaceholder: "തിരയുക...",
+        appearance: "രൂപഭാവം",
+        theme: "ആപ്പ് തീം",
+        light: "ലൈറ്റ് തീം",
+        dark: "ഡാർക്ക് തീം",
+        localization: "ഭാഷ തിരഞ്ഞെടുക്കുക",
+        language: "ഭാഷ",
+        save: "സേവ് ചെയ്യുക",
+        saved: "വിജയകരമായി സേവ് ചെയ്തു!",
+        legendPending: "തീർച്ചപ്പെടുത്തിയിട്ടില്ല",
+        legendInProgress: "പുരോഗതിയിൽ",
+        legendReview: "പരിശോധനയിൽ",
+        legendResolved: "പരിഹരിച്ചു",
+        legendReopened: "വീണ്ടും തുറന്നു",
+        locateMe: "എന്റെ ലൊക്കേഷൻ",
+        resetView: "റീസെറ്റ് വ്യൂ",
+        heroBadge: "✨ കോഴിക്കോട് സിവിക് ഇനിഷ്യേറ്റീവ്",
+        heroTitle: "പൗരന്മാരെ ശാക്തീകരിക്കുന്നു.<br>കോഴിക്കോടിനെ മാറ്റുന്നു.",
+        heroSub: "പ്രശ്നങ്ങൾ റിപ്പോർട്ട് ചെയ്യുക, പരിഹാരങ്ങൾ ട്രാക്ക് ചെയ്യുക, സുതാര്യതയിലൂടെയും പ്രവർത്തനത്തിലൂടെയും മികച്ചൊരു സമൂഹം ഒരുമിച്ച് കെട്ടിപ്പടുക്കുക.",
+        howItWorksSub: "വൃത്തിയുള്ളതും മെച്ചപ്പെട്ടതുമായ നഗരത്തിലേക്കുള്ള ലളിതമായ ഘട്ടങ്ങൾ.",
+        step1Desc: "ഏതെങ്കിലും സിവിക് പ്രശ്നത്തിന്റെ ഫോട്ടോ എടുത്ത് ലൊക്കേഷൻ പിൻ ചെയ്യുക. ഇത് വേഗതയുള്ളതും എളുപ്പവുമാണ്.",
+        step2Desc: "തത്സമയം പുരോഗതി നിരീക്ഷിക്കുക. അവശ്യ പ്രശ്നങ്ങൾക്ക് അർഹമായ ശ്രദ്ധ ലഭിക്കുന്നുവെന്ന് ഉറപ്പാക്കാൻ അവ വോട്ട് ചെയ്യുക.",
+        step3Desc: "പൂർത്തിയായ പ്രശ്നങ്ങൾ പരിഹരിച്ചുവെന്ന് പരിശോധിക്കുക. പ്രാദേശിക അധികാരികളോടൊപ്പം ഞങ്ങൾ ഇത് പൂർത്തിയാക്കുന്നു.",
+        liveUpdatesSub: "പ്രാദേശിക സിവിക് പ്രവർത്തനങ്ങളെക്കുറിച്ച് അറിയുക."
+    },
+    hi: {
+        dashboard: "डैशबोर्ड",
+        profile: "मेरी प्रोफ़ाइल",
+        settings: "ऐप सेटिंग्स",
+        about: "हमारे बारे में",
+        connect: "स्वयंसेवक बनें",
+        signOut: "साइन आउट",
+        reportIssue: "समस्या रिपोर्ट करें",
+        trackProgress: "प्रगति ट्रैक करें",
+        howItWorks: "फिक्समाईएरिया कैसे काम करता है",
+        report: "1. रिपोर्ट",
+        track: "2. ट्रैक",
+        resolve: "3. समाधान",
+        totalIssues: "कुल मुद्दे",
+        mostReported: "सर्वाधिक रिपोर्ट किए गए",
+        mostCritical: "सबसे गंभीर",
+        latestActivity: "नवीनतम गतिविधि",
+        latestNews: "लाइव अपडेट",
+        viewFullFeed: "फ़ीड देखें",
+        allCategories: "सभी श्रेणियां",
+        allStatuses: "सभी स्थितियां",
+        highestPriority: "उच्चतम प्राथमिकता",
+        mostRecent: "सबसे हालिया",
+        welcomeGuest: "स्वागत है अतिथि",
+        signIn: "साइन इन करें",
+        register: "खाता बनाएं",
+        searchPlaceholder: "खोजें...",
+        appearance: "दिखावट",
+        theme: "ऐप थीम",
+        light: "लाइट थीम",
+        dark: "डार्क थीम",
+        localization: "स्थानीयकरण",
+        language: "भाषा वरीयता",
+        save: "प्राथमिकताएं सहेजें",
+        saved: "प्राथमिकताएं सफलतापूर्वक सहेजी गईं!",
+        legendPending: "लंबित",
+        legendInProgress: "प्रगति में",
+        legendReview: "समीक्षा आवश्यक",
+        legendResolved: "सुलझाया गया",
+        legendReopened: "फिर से खोला",
+        locateMe: "मेरी स्थिति",
+        resetView: "व्यू रिसेट करें",
+        heroBadge: "✨ कोझिकोड नागरिक पहल",
+        heroTitle: "नागरिकों को सशक्त बनाना।<br>कोझिकोड को बदलना।",
+        heroSub: "समस्याओं की रिपोर्ट करें, समाधान ट्रैक करें और पारदर्शिता और कार्रवाई के माध्यम से मिलकर एक बेहतर समुदाय बनाएं।",
+        howItWorksSub: "एक स्वच्छ और बेहतर शहर की दिशा में सरल कदम।",
+        step1Desc: "किसी भी नागरिक समस्या का फोटो लें और स्थान पिन करें। यह तेज़ और आसान है।",
+        step2Desc: "वास्तविक समय में प्रगति की निगरानी करें। महत्वपूर्ण मुद्दों को अपवोट करें।",
+        step3Desc: "समाधान सत्यापित करें। हम स्थानीय अधिकारियों के साथ मिलकर काम करते हैं।",
+        liveUpdatesSub: "स्थानीय नागरिक कार्यों के बारे में जानकारी रखें।"
+    }
 };
+
+function applyLanguage(lang) {
+    const t = translations[lang] || translations.en;
+    
+    // Standard translations
+    document.querySelectorAll("[data-i18n]").forEach(el => {
+        const key = el.getAttribute("data-i18n");
+        if (t[key]) {
+            if (el.tagName === "INPUT" && el.type === "search") {
+                el.placeholder = t[key];
+            } else if (t[key].includes("<br>")) {
+                el.innerHTML = t[key];
+            } else {
+                el.innerText = t[key];
+            }
+        }
+    });
+
+    // Title translations
+    document.querySelectorAll("[data-i18n-title]").forEach(el => {
+        const key = el.getAttribute("data-i18n-title");
+        if (t[key]) {
+            el.title = t[key];
+        }
+    });
+}
+
+function applyTheme(theme) {
+    if (theme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+        document.documentElement.removeAttribute('data-theme');
+    }
+}
 
 function timeAgo(dateString) {
     if (!dateString) return "Just now";
@@ -62,8 +243,44 @@ document.addEventListener("DOMContentLoaded", () => {
         // Guest mode: render map and issues but require login for actions
         listenToIssues();
         if (!mapInitialized) initMap();
-        else leafletMap.invalidateSize();
+        else {
+            setTimeout(() => leafletMap.invalidateSize(), 100);
+        }
     }
+
+    // Lang already applied via common.js if needed, but we keep it here for specific content
+    const currentLang = localStorage.getItem("fixmyarea_lang") || "en";
+    applyLanguage(currentLang);
+
+    // Add support for multi-tab synchronization
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'fixmyarea_issues') {
+            const localIssues = localStorage.getItem("fixmyarea_issues");
+            if (localIssues) {
+                dbIssues = JSON.parse(localIssues);
+                renderIssues();
+            }
+        }
+        if (e.key === 'fixmyarea_user') {
+            if (!e.newValue) {
+                logout();
+            } else {
+                location.reload();
+            }
+        }
+        if (e.key === 'fixmyarea_theme') {
+            applyTheme(e.newValue);
+            // Update settings UI if on settings page
+            const themeSelect = document.getElementById('themeSelect');
+            if (themeSelect) themeSelect.value = e.newValue;
+        }
+        if (e.key === 'fixmyarea_lang') {
+            applyLanguage(e.newValue);
+            // Update settings UI if on settings page
+            const langSelect = document.getElementById('langSelect');
+            if (langSelect) langSelect.value = e.newValue;
+        }
+    });
 });
 
 function setupEventListeners() {
@@ -182,8 +399,11 @@ function handleSuccessfulLogin(user, role) {
 }
 
 function logout() {
-    localStorage.removeItem("fixmyarea_user");
-    location.reload();
+    if (typeof window.logout === 'function') window.logout();
+    else {
+        localStorage.removeItem("fixmyarea_user");
+        location.reload();
+    }
 }
 
 /*************************************************
@@ -274,6 +494,9 @@ async function handleReportSubmit(e) {
             const lat = 11.25 + (Math.random() * 0.02);
             const lng = 75.77 + (Math.random() * 0.02);
 
+            // Get user info for report
+            const userData = JSON.parse(localStorage.getItem("fixmyarea_user") || "{}");
+
             // Add to mock local DB
             const newIssue = {
                 id: "issue_" + Date.now(),
@@ -284,6 +507,8 @@ async function handleReportSubmit(e) {
                 votes: 0,
                 timestamp: new Date().toISOString(),
                 uid: currentUserUID,
+                reporterName: userData.name || "Anonymous",
+                reporterWard: userData.ward || "Unknown Ward",
                 lat, lng
             };
             
@@ -291,11 +516,16 @@ async function handleReportSubmit(e) {
             saveIssuesLocally();
             renderIssues();
 
-            hideModal("reportModal");
-            e.target.reset();
-            
-            submitBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Upload & Submit Report';
-            submitBtn.disabled = false;
+            // Handle redirection if we are in report.html
+            if (window.location.href.includes('report.html')) {
+                alert("Issue Submitted Successfully!");
+                window.location.href = 'index.html';
+            } else {
+                hideModal("reportModal");
+                e.target.reset();
+                submitBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Upload & Submit Report';
+                submitBtn.disabled = false;
+            }
         };
         
         if (file) {
@@ -443,24 +673,63 @@ function initMap() {
     mapInitialized = true;
 }
 
+function locateMe() {
+    if (!leafletMap) return;
+    leafletMap.locate({setView: true, maxZoom: 16});
+}
+
+function resetMapView() {
+    if (!leafletMap) return;
+    leafletMap.setView([11.2588, 75.7804], 14);
+}
+
 function updateMap(filteredList) {
     if (!leafletMap) return;
+    
+    // Clear existing markers
     currentMarkers.forEach(m => leafletMap.removeLayer(m));
     currentMarkers = [];
 
+    const now = new Date();
+
     filteredList.forEach(issue => {
         if (issue.lat && issue.lng) {
-            let color = "#F59E0B";
+            let color = "#F59E0B"; // Pending
             if (issue.status === "In Progress") color = "#3B82F6";
             if (issue.status === "Review") color = "#8B5CF6";
             if (issue.status === "Resolved") color = "#10B981";
+            if (issue.status === "Reopened") color = "#EF4444";
 
-            const markerHtml = `<div style="background-color: ${color}; width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.4);"></div>`;
-            const icon = L.divIcon({ html: markerHtml, className: 'custom-leaflet-marker', iconSize: [16, 16], iconAnchor: [8, 8] });
+            // Determine if it's a "new" issue (reported in the last 5 minutes)
+            const reportedTime = new Date(issue.timestamp);
+            const isVeryRecent = (now - reportedTime) < 5 * 60 * 1000;
+
+            const markerHtml = `
+                <div class="custom-marker-wrapper ${isVeryRecent ? 'pulse-new' : ''}">
+                    <div style="background-color: ${color}; width: 18px; height: 18px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 10px rgba(0,0,0,0.3);"></div>
+                </div>
+            `;
+            
+            const icon = L.divIcon({ 
+                html: markerHtml, 
+                className: 'custom-leaflet-marker', 
+                iconSize: [24, 24], 
+                iconAnchor: [12, 12] 
+            });
 
             const marker = L.marker([issue.lat, issue.lng], { icon }).addTo(leafletMap);
+            
+            // Add tooltip for quick info
+            marker.bindTooltip(`<strong>${issue.category}</strong><br>${issue.location}`, {
+                direction: 'top',
+                offset: [0, -10]
+            });
+
             marker.on('click', () => openDetails(issue.id));
             currentMarkers.push(marker);
+            
+            // If it's very recent and we just loaded/updated, maybe fly to it?
+            // (Only for the most recent one to avoid multiple flies)
         }
     });
 }
