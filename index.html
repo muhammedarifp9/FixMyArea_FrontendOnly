@@ -58,17 +58,35 @@
                 <button id="btnHamburger" class="hamburger-icon" onclick="document.getElementById('slideMenu').classList.add('active'); document.getElementById('slideOverlay').classList.add('active');"><i class="fa-solid fa-bars"></i></button>
                 <a href="index.html" class="logo" style="text-decoration:none;"><i class="fa-solid fa-map-location-dot"></i> FixMyArea</a>
             </div>
-            <div class="nav-links">
-                <a href="index.html" class="nav-link active" data-i18n="dashboard">Dashboard</a>
-                <a href="profile.html" class="nav-link" data-auth="user" data-i18n="profile">Profile</a>
-                <a href="noti.html" class="nav-link" data-auth="user" data-i18n="latestNews">Notifications</a>
-                <a href="about.html" class="nav-link" data-i18n="about">About Us</a>
-                <a href="login.html" class="btn btn-outline" data-auth="guest">Sign In</a>
+            <div class="nav-links" id="desktopNavLinks">
+                <a href="index.html" style="text-decoration:none; color:var(--primary); font-weight:700;" data-i18n="dashboard">Dashboard</a>
+                <a href="about.html" style="text-decoration:none; color:var(--text-main); font-weight:600;" data-i18n="about">About Us</a>
+                <a href="settings.html" style="text-decoration:none; color:var(--text-main); font-weight:600;" data-auth="user" data-i18n="settings">Settings</a>
+                <a href="connect.html" style="text-decoration:none; color:var(--text-main); font-weight:600;" data-i18n="connect">Join Us</a>
+                <a href="login.html" class="btn btn-outline" style="padding:0.4rem 1.2rem;" data-auth="guest">Sign In</a>
             </div>
-            <div class="nav-actions" data-auth="user">
-                <button onclick="window.location.href='profile.html'" class="btn btn-outline" style="border:none; padding:0.5rem;" title="Go to Profile">
-                    <i class="fa-solid fa-user-circle fa-2x" style="color:var(--text-muted);"></i>
-                </button>
+            <div class="nav-actions">
+                <div id="userProfile" class="profile-dropdown-container">
+                    <button class="profile-avatar-btn" id="btnProfileToggle">
+                        <div class="avatar-circle" id="profileAvatarInitials" style="background:var(--border); color:var(--text-muted);"><i class="fa-solid fa-user"></i></div>
+                        <span id="profileName" class="profile-name" style="font-weight:600; color:var(--text-main);" data-i18n="welcomeGuest">Sign In</span>
+                        <i class="fa-solid fa-chevron-down" style="color:var(--text-muted); font-size:0.8rem; margin-left:0.25rem;"></i>
+                    </button>
+                    <div class="profile-menu">
+                        <div class="profile-header">
+                            <strong id="profileMenuRole" data-i18n="welcomeGuest">Welcome Guest</strong>
+                        </div>
+                        <div id="authMenuActions">
+                            <div class="dropdown-item" onclick="window.location.href='login.html'">
+                                <i class="fa-solid fa-door-open" style="color:var(--primary);"></i> <span style="font-weight:600; color:var(--text-main);" data-i18n="signIn">Sign In</span>
+                            </div>
+                            <div class="dropdown-item" onclick="window.location.href='register.html'">
+                                <i class="fa-solid fa-user-plus" style="color:var(--secondary);"></i> <span style="font-weight:600; color:var(--text-main);" data-i18n="register">Register Account</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button id="btnOpenReport" class="btn btn-primary" data-i18n="reportIssue"><i class="fa-solid fa-plus"></i> Report Issue</button>
             </div>
         </nav>
 

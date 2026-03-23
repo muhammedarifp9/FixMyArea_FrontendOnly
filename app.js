@@ -290,6 +290,23 @@ function handleSuccessfulLogin(user, role, name) {
     if(initialsEl) {
         initialsEl.innerText = name.substring(0, 1).toUpperCase();
         initialsEl.style.background = "var(--primary)";
+        initialsEl.style.color = "white";
+    }
+    const roleEl = document.getElementById("profileMenuRole");
+    if(roleEl) roleEl.innerText = name + " (" + role.charAt(0).toUpperCase() + role.slice(1) + ")";
+
+    // Switch auth menu to logged-in state
+    const authMenu = document.getElementById("authMenuActions");
+    if(authMenu) {
+        authMenu.innerHTML = `
+            <div class="dropdown-item" onclick="window.location.href='profile.html'">
+                <i class="fa-solid fa-user-circle" style="color:var(--primary);"></i>
+                <span style="font-weight:600;">My Profile</span>
+            </div>
+            <div class="dropdown-item" onclick="logout()" style="color:var(--status-reopened);">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span style="font-weight:600;">Sign Out</span>
+            </div>`;
     }
     listenToIssues();
 }
@@ -299,6 +316,30 @@ function handleLogoutUI() {
     currentRole = null;
     localStorage.removeItem('fixmyarea_user');
     if (typeof initNavigation === "function") initNavigation();
+
+    // Reset profile dropdown to guest state
+    const profileNameEl = document.getElementById("profileName");
+    if(profileNameEl) profileNameEl.innerText = "Sign In";
+    const initialsEl = document.getElementById("profileAvatarInitials");
+    if(initialsEl) {
+        initialsEl.innerHTML = '<i class="fa-solid fa-user"></i>';
+        initialsEl.style.background = "var(--border)";
+        initialsEl.style.color = "var(--text-muted)";
+    }
+    const roleEl = document.getElementById("profileMenuRole");
+    if(roleEl) roleEl.innerText = "Welcome Guest";
+    const authMenu = document.getElementById("authMenuActions");
+    if(authMenu) {
+        authMenu.innerHTML = `
+            <div class="dropdown-item" onclick="window.location.href='login.html'">
+                <i class="fa-solid fa-door-open" style="color:var(--primary);"></i>
+                <span style="font-weight:600;">Sign In</span>
+            </div>
+            <div class="dropdown-item" onclick="window.location.href='register.html'">
+                <i class="fa-solid fa-user-plus" style="color:var(--secondary);"></i>
+                <span style="font-weight:600;">Register Account</span>
+            </div>`;
+    }
     listenToIssues();
 }
 
