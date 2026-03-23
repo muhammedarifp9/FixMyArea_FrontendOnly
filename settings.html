@@ -36,16 +36,15 @@
             <button id="btnHamburger" class="hamburger-icon" onclick="document.getElementById('slideMenu').classList.add('active'); document.getElementById('slideOverlay').classList.add('active');"><i class="fa-solid fa-bars"></i></button>
             <a href="index.html" class="logo" style="text-decoration:none;"><i class="fa-solid fa-map-location-dot"></i> FixMyArea</a>
         </div>
-        <div class="nav-links" style="display:flex; gap:2rem;">
-            <a href="index.html" style="text-decoration:none; color:var(--text-main); font-weight:600;" data-i18n="dashboard">Dashboard</a>
-            <a href="about.html" style="text-decoration:none; color:var(--text-main); font-weight:600;" data-i18n="about">About Us</a>
-            <a href="settings.html" style="text-decoration:none; color:var(--primary); font-weight:700;" data-auth="user" data-i18n="settings">Settings</a>
-            <a href="connect.html" style="text-decoration:none; color:var(--text-main); font-weight:600;" data-i18n="connect">Join Us</a>
-            <a href="login.html" class="btn btn-outline" style="padding:0.4rem 1.2rem; border-radius:var(--radius-md);" data-auth="guest">Sign In</a>
+        <div class="nav-links">
+            <a href="index.html" class="nav-link" data-i18n="dashboard">Dashboard</a>
+            <a href="profile.html" class="nav-link" data-auth="user" data-i18n="profile">Profile</a>
+            <a href="noti.html" class="nav-link" data-auth="user" data-i18n="latestNews">Notifications</a>
+            <a href="about.html" class="nav-link" data-i18n="about">About Us</a>
+            <a href="login.html" class="btn btn-outline" data-auth="guest">Sign In</a>
         </div>
         <div class="nav-actions" data-auth="user">
-            <!-- Simplified Profile dropdown for settings page -->
-            <button id="btnProfileSettings" onclick="window.location.href='profile.html'" class="btn btn-outline" style="border:none; padding:0.5rem;">
+            <button onclick="window.location.href='profile.html'" class="btn btn-outline" style="border:none; padding:0.5rem;" title="Go to Profile">
                 <i class="fa-solid fa-user-circle fa-2x" style="color:var(--text-muted);"></i>
             </button>
         </div>
@@ -79,7 +78,7 @@
             <div class="form-group" style="margin-bottom: 1rem;">
                 <label style="font-size: 1.05rem; font-weight: 600; color: var(--text-main);" data-i18n="language">Language Preference</label>
                 <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem;">Select your preferred language interface.</p>
-                <select id="langSelect" style="width:100%; padding:0.85rem; border:1px solid var(--border); border-radius:var(--radius-md); font-size:1rem; background:var(--background); color:var(--text-main);">
+                <select id="langSelect" onchange="applyLanguage(this.value)" style="width:100%; padding:0.85rem; border:1px solid var(--border); border-radius:var(--radius-md); font-size:1rem; background:var(--background); color:var(--text-main);">
                     <option value="en">English (Default)</option>
                     <option value="ml">Malayalam / മലയാളം</option>
                     <option value="hi">Hindi / हिन्दी</option>
@@ -94,6 +93,10 @@
     </main>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script src="app.js"></script>
     <script>
         // Init form state
         document.addEventListener("DOMContentLoaded", () => {
@@ -103,30 +106,6 @@
             const currentLang = localStorage.getItem("fixmyarea_lang") || "en";
             document.getElementById("langSelect").value = currentLang;
         });
-
-        // Instant toggle for real-time visual feedback
-        function applyThemePreference(themeValue) {
-            if (themeValue === 'dark') {
-                document.documentElement.setAttribute('data-theme', 'dark');
-            } else {
-                document.documentElement.removeAttribute('data-theme');
-            }
-        }
-
-        // Final Save implementation
-        function saveSettings() {
-            const theme = document.getElementById("themeSelect").value;
-            const lang = document.getElementById("langSelect").value;
-            
-            localStorage.setItem("fixmyarea_theme", theme);
-            localStorage.setItem("fixmyarea_lang", lang);
-            
-            applyThemePreference(theme);
-            
-            const toast = document.getElementById("settingsToast");
-            toast.style.display = "block";
-            setTimeout(() => { toast.style.display = "none"; }, 3000);
-        }
     </script>
 </body>
 </html>

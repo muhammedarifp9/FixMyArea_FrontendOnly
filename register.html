@@ -129,6 +129,10 @@
         </form>
     </div>
 
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script src="app.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             const params = new URLSearchParams(window.location.search);
@@ -149,57 +153,6 @@
                 document.getElementById('tab-citizen').classList.remove('active');
                 document.getElementById('form-admin').style.display = 'block';
                 document.getElementById('form-citizen').style.display = 'none';
-            }
-        }
-
-        // Standalone Registration Script
-        function registerUser(type) {
-            const errorDiv = document.getElementById(type === 'citizen' ? "citError" : "admError");
-            errorDiv.style.display = "none";
-            
-            let email, password, name, phone, ward, dept;
-            if (type === 'citizen') {
-                email = document.getElementById("regEmail").value.trim();
-                password = document.getElementById("regPassword").value;
-                name = document.getElementById("regName").value.trim();
-                phone = document.getElementById("regPhone").value.trim();
-                ward = document.getElementById("regWard").value.trim();
-                
-                if (!email || !password || !name || !ward) {
-                    errorDiv.innerText = "Please fill in all required fields (Name, Ward, Email, Password).";
-                    errorDiv.style.display = "block"; return;
-                }
-            } else {
-                email = document.getElementById("admRegEmail").value.trim();
-                password = document.getElementById("admRegPassword").value;
-                name = document.getElementById("admRegName").value.trim();
-                dept = document.getElementById("admRegDept").value.trim();
-                
-                if (!email || !password || !name || !dept) {
-                    errorDiv.innerText = "Please fill in all official details (Name, Dept, Email, Password).";
-                    errorDiv.style.display = "block"; return;
-                }
-            }
-            
-            // Mock user creation
-            const uid = type + "_" + Date.now();
-            const role = type; 
-            
-            const newUser = { uid, role, email, password, name, phone: phone||"", ward: ward||"", dept: dept||"" };
-            
-            // Save to Mock User DB
-            const userDb = JSON.parse(localStorage.getItem("fixmyarea_mock_db") || "[]");
-            userDb.push(newUser);
-            localStorage.setItem("fixmyarea_mock_db", JSON.stringify(userDb));
-
-            // Set as active session
-            localStorage.setItem("fixmyarea_user", JSON.stringify(newUser));
-            
-            // Redirect based on role
-            if (newUser.role === 'admin') {
-                window.location.href = "index.html";
-            } else {
-                window.location.href = "report.html";
             }
         }
     </script>

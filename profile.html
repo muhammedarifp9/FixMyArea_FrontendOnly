@@ -54,15 +54,17 @@
             <button id="btnHamburger" class="hamburger-icon" onclick="document.getElementById('slideMenu').classList.add('active'); document.getElementById('slideOverlay').classList.add('active');"><i class="fa-solid fa-bars"></i></button>
             <a href="index.html" class="logo" style="text-decoration:none;"><i class="fa-solid fa-map-location-dot"></i> FixMyArea</a>
         </div>
-        <div class="nav-links" style="display:flex; gap:2rem;">
-            <a href="index.html" style="text-decoration:none; color:var(--text-main); font-weight:600;">Dashboard</a>
-            <a href="about.html" style="text-decoration:none; color:var(--text-main); font-weight:600;">About Us</a>
-            <a href="settings.html" style="text-decoration:none; color:var(--text-main); font-weight:600;" data-auth="user">Settings</a>
-            <a href="connect.html" style="text-decoration:none; color:var(--text-main); font-weight:600;">Join Us</a>
-            <a href="login.html" class="btn btn-outline" style="padding:0.4rem 1.2rem; border-radius:var(--radius-md);" data-auth="guest">Sign In</a>
+        <div class="nav-links">
+            <a href="index.html" class="nav-link" data-i18n="dashboard">Dashboard</a>
+            <a href="profile.html" class="nav-link active" data-auth="user" data-i18n="profile">Profile</a>
+            <a href="noti.html" class="nav-link" data-auth="user" data-i18n="latestNews">Notifications</a>
+            <a href="about.html" class="nav-link" data-i18n="about">About Us</a>
+            <a href="login.html" class="btn btn-outline" data-auth="guest">Sign In</a>
         </div>
         <div class="nav-actions" data-auth="user">
-            <button class="btn btn-outline" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</button>
+            <button onclick="window.location.href='profile.html'" class="btn btn-outline" style="border:none; padding:0.5rem;" title="Go to Profile">
+                <i class="fa-solid fa-user-circle fa-2x" style="color:var(--text-muted);"></i>
+            </button>
         </div>
     </nav>
 
@@ -94,58 +96,45 @@
                 <label>Kozhikode Ward / Local Area</label>
                 <input type="text" id="profWard">
             </div>
-            <div style="grid-column: span 2; display:flex; justify-content:flex-end; margin-top:1rem; gap:1rem;">
-                <a href="index.html" class="btn btn-outline" style="padding: 0.85rem 2rem;">Cancel</a>
-                <button type="button" class="btn btn-primary" onclick="saveProfile()" style="padding: 0.85rem 2rem;"><i class="fa-solid fa-floppy-disk"></i> Save Profile</button>
+            <div style="grid-column: span 2; display:flex; justify-content:space-between; align-items:center; margin-top:2rem; padding-top:2rem; border-top:1px solid var(--border-light);">
+                <button type="button" class="btn btn-outline" onclick="deleteCurrentUserAccount()" style="color:var(--status-reopened); border-color:var(--status-reopened);"><i class="fa-solid fa-user-slash"></i> Delete Account</button>
+                <div style="display:flex; gap:1rem;">
+                    <a href="index.html" class="btn btn-outline" style="padding: 0.85rem 2rem;">Cancel</a>
+                    <button type="button" class="btn btn-primary" onclick="saveProfile()" style="padding: 0.85rem 2rem;"><i class="fa-solid fa-floppy-disk"></i> Save Profile</button>
+                </div>
             </div>
         </form>
         <div id="profSuccess" style="color:var(--status-resolved); font-weight:600; text-align:center; display:none; margin-top:2rem;"><i class="fa-solid fa-circle-check"></i> Profile updated successfully!</div>
     </main>
 
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script src="app.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            const savedUser = localStorage.getItem("fixmyarea_user");
-            if (!savedUser) {
-                window.location.href = "login.html"; return;
-            }
-            
-            const user = JSON.parse(savedUser);
-            
-            document.getElementById("hugeAvatar").innerText = user.role === 'admin' ? 'A' : (user.name ? user.name.charAt(0).toUpperCase() : 'C');
-            document.getElementById("displayTitleName").innerText = user.name || "Citizen User";
-            document.getElementById("displayRoleBadge").innerText = user.role === 'admin' ? "★ Authority Account" : "Citizen Account";
-            
-            document.getElementById("profName").value = user.name || "";
-            document.getElementById("profEmail").value = user.email || "";
-            document.getElementById("profPhone").value = user.phone || "";
-            document.getElementById("profWard").value = user.ward || "";
+            const checkAuth = setInterval(async () => {
+                if (supabase && (await supabase.auth.getSession()).data.session) {
+                    clearInterval(checkAuth);
+                    const user = (await supabase.auth.getUser()).data.user;
+                    
+                    const { data: roleData } = await supabase.from('user_roles').select('role').eq('user_id', user.id).single();
+                    const { data: profile } = await supabase.from('profiles').select('*').eq('user_id', user.id).single();
+                    
+                    const role = roleData?.role || 'citizen';
+                    const name = profile?.full_name || user.email.split('@')[0];
+                    
+                    document.getElementById("hugeAvatar").innerText = name.charAt(0).toUpperCase();
+                    document.getElementById("displayTitleName").innerText = name;
+                    document.getElementById("displayRoleBadge").innerText = role.charAt(0).toUpperCase() + role.slice(1) + " Account";
+                    
+                    document.getElementById("profName").value = name;
+                    document.getElementById("profEmail").value = user.email || "";
+                    document.getElementById("profPhone").value = profile?.phone || "";
+                    document.getElementById("profWard").value = profile?.ward || "";
+                }
+            }, 500);
         });
-
-        function saveProfile() {
-            const savedUser = JSON.parse(localStorage.getItem("fixmyarea_user"));
-            if (!savedUser) return;
-            
-            savedUser.name = document.getElementById("profName").value.trim();
-            savedUser.phone = document.getElementById("profPhone").value.trim();
-            savedUser.ward = document.getElementById("profWard").value.trim();
-            
-            localStorage.setItem("fixmyarea_user", JSON.stringify(savedUser));
-            
-            document.getElementById("hugeAvatar").innerText = savedUser.name ? savedUser.name.charAt(0).toUpperCase() : 'C';
-            document.getElementById("displayTitleName").innerText = savedUser.name || "Citizen User";
-            
-            const success = document.getElementById("profSuccess");
-            success.style.display = "block";
-            setTimeout(() => { success.style.display = "none"; }, 3000);
-        }
-
-        function logout() {
-            if (typeof window.logout === 'function') window.logout();
-            else {
-                localStorage.removeItem("fixmyarea_user");
-                window.location.href = "index.html";
-            }
-        }
     </script>
 </body>
 </html>

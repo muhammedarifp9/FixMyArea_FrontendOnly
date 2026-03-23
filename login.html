@@ -110,64 +110,22 @@
         </form>
     </div>
 
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script src="app.js"></script>
     <script>
-        // Specific standalone script for Login page so we don't load map libraries
         function switchPortal(type) {
             if (type === 'citizen') {
                 document.getElementById('tab-citizen').classList.add('active');
                 document.getElementById('tab-admin').classList.remove('active');
                 document.getElementById('form-citizen').style.display = 'block';
                 document.getElementById('form-admin').style.display = 'none';
-                document.getElementById('btnCreateAccount').href = 'register.html?portal=citizen';
             } else {
                 document.getElementById('tab-admin').classList.add('active');
                 document.getElementById('tab-citizen').classList.remove('active');
                 document.getElementById('form-admin').style.display = 'block';
                 document.getElementById('form-citizen').style.display = 'none';
-                document.getElementById('btnCreateAccount').href = 'register.html?portal=admin';
-            }
-        }
-
-        function loginUser(type) {
-            const errorDiv = document.getElementById(type === 'citizen' ? "citError" : "admError");
-            errorDiv.style.display = "none";
-            
-            const email = document.getElementById(type === 'citizen' ? "citEmail" : "admEmail").value.trim();
-            const password = document.getElementById(type === 'citizen' ? "citPassword" : "admPassword").value;
-            
-            if (!email || !password) {
-                errorDiv.innerText = "Please fill in all credentials.";
-                errorDiv.style.display = "block"; return;
-            }
-            
-            // Mock Login Check
-            const userDb = JSON.parse(localStorage.getItem("fixmyarea_mock_db") || "[]");
-            const foundUser = userDb.find(u => u.email === email && u.password === password);
-
-            if (!foundUser) {
-                errorDiv.innerText = "Invalid email or password. Please register first!";
-                errorDiv.style.display = "block";
-                return;
-            }
-
-            // Set as active session
-            localStorage.setItem("fixmyarea_user", JSON.stringify(foundUser));
-            
-            window.location.href = "index.html";
-        }
-
-        function handleForgotPassword(type) {
-            const emailInput = document.getElementById(type === 'citizen' ? "citEmail" : "admEmail");
-            const email = emailInput.value.trim();
-            
-            if (!email) {
-                alert("Please enter your email address first so we can send a reset link.");
-                emailInput.focus();
-                return;
-            }
-
-            if (confirm(`Send mock password reset email to ${email}?`)) {
-                alert("Success! Please check your inbox for the password reset link. (Mock Setup)");
             }
         }
     </script>
