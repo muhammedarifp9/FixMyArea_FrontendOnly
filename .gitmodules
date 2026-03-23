@@ -1,0 +1,3 @@
+[submodule "frontend"]
+	path = frontend
+	url = https://github.com/muhammedarifp9/FixMyArea_FrontendOnly.git
