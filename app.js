@@ -480,59 +480,75 @@ async function handleReportSubmit(e) {
     submitBtn.disabled = true;
 
     try {
-        const file = document.getElementById("issueFile").files[0];
+        const issueFile = document.getElementById("issueFile").files[0];
+        const proofFile = document.getElementById("proofFile").files[0];
         const category = document.getElementById("issueCategory").value;
-        const location = document.getElementById("issueLocation").value;
         const description = document.getElementById("issueDescription").value;
 
-        // Convert image to Base64 using FileReader instead of Firebase Storage
-        const reader = new FileReader();
-        reader.onloadend = function() {
-            const imageUrl = reader.result;
-            
-            // Generate mock lat/lng
-            const lat = 11.25 + (Math.random() * 0.02);
-            const lng = 75.77 + (Math.random() * 0.02);
+        let location = document.getElementById("loc_street1").value;
+        const city = document.getElementById("loc_city")?.value || "Kozhikode";
+        const zip = document.getElementById("loc_zip")?.value || "";
+        if (city || zip) location += `, ${city} ${zip}`;
 
-            // Get user info for report
-            const userData = JSON.parse(localStorage.getItem("fixmyarea_user") || "{}");
+        const locationDetail = {
+            street1: document.getElementById("loc_street1").value,
+            street2: document.getElementById("loc_street2")?.value || "",
+            city: city,
+            state: document.getElementById("loc_state")?.value || "",
+            zip: zip,
+            country: document.getElementById("loc_country")?.value || ""
+        };
 
-            // Add to mock local DB
-            const newIssue = {
-                id: "issue_" + Date.now(),
-                category, location, description,
-                beforeImg: imageUrl,
-                afterImg: null,
-                status: "Pending",
-                votes: 0,
-                timestamp: new Date().toISOString(),
-                uid: currentUserUID,
-                reporterName: userData.name || "Anonymous",
-                reporterWard: userData.ward || "Unknown Ward",
-                lat, lng
-            };
-            
-            dbIssues.push(newIssue);
-            saveIssuesLocally();
-            renderIssues();
+        const readAsDataURLAsync = (file) => new Promise((resolve, reject) => {
+            if (!file) { resolve(null); return; }
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
 
-            // Handle redirection if we are in report.html
-            if (window.location.href.includes('report.html')) {
-                alert("Issue Submitted Successfully!");
-                window.location.href = 'index.html';
-            } else {
-                hideModal("reportModal");
-                e.target.reset();
-                submitBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Upload & Submit Report';
-                submitBtn.disabled = false;
-            }
+        const imageUrl = await readAsDataURLAsync(issueFile);
+        const proofUrl = await readAsDataURLAsync(proofFile);
+
+        if (!imageUrl) throw new Error("Please select an issue image file.");
+
+        // Generate mock lat/lng
+        const lat = 11.25 + (Math.random() * 0.02);
+        const lng = 75.77 + (Math.random() * 0.02);
+
+        // Get user info for report
+        const userData = JSON.parse(localStorage.getItem("fixmyarea_user") || "{}");
+
+        // Add to mock local DB
+        const newIssue = {
+            id: "issue_" + Date.now(),
+            category, location, description, locationDetail,
+            beforeImg: imageUrl,
+            proofImg: proofUrl,
+            afterImg: null,
+            status: "Pending",
+            votes: 0,
+            timestamp: new Date().toISOString(),
+            uid: currentUserUID,
+            reporterName: userData.name || "Anonymous",
+            reporterWard: userData.ward || "Unknown Ward",
+            lat, lng
         };
         
-        if (file) {
-            reader.readAsDataURL(file);
+        dbIssues.push(newIssue);
+        saveIssuesLocally();
+        renderIssues();
+
+        if (window.location.href.includes('report.html')) {
+            alert("Issue Submitted Successfully! Redirecting...");
+            window.location.href = 'index.html';
         } else {
-            throw new Error("Please select an image file.");
+            hideModal("reportModal");
+            e.target.reset();
+            submitBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Upload & Submit Report';
+            submitBtn.disabled = false;
         }
+
     } catch (err) {
         alert("Upload Failed: " + err.message);
         submitBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Upload & Submit Report';
@@ -799,11 +815,17 @@ function openDetails(id) {
         
         <p style="font-size: 1.125rem; color: #475569; margin-bottom: 2rem;">${issue.description}</p>
         
-        <div class="media-comparison">
+        <div class="media-comparison" ${issue.proofImg ? 'style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));"' : ''}>
             <div class="media-side">
                 <h4><i class="fa-solid fa-image"></i> Problem Reported</h4>
                 <img src="${issue.beforeImg}" alt="Before">
             </div>
+            ${issue.proofImg ? `
+            <div class="media-side">
+                <h4><i class="fa-solid fa-file-invoice"></i> Address Proof</h4>
+                <img src="${issue.proofImg}" alt="Proof" style="border:1px solid #e2e8f0; border-radius: var(--radius-md);">
+            </div>
+            ` : ''}
             ${issue.afterImg ? `
             <div class="media-side">
                 <h4><i class="fa-solid fa-image"></i> Resolution Proof</h4>
